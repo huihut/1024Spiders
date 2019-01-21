@@ -132,7 +132,7 @@ class MySQLCommand(object):
             print("Failed to " + sql)
         try:
             an_id = -1
-            an_id = self.cursor.lastrowid;
+            an_id = self.cursor.lastrowid
             if an_id != -1:
                 return an_id
         except:
