@@ -64,7 +64,7 @@ proxies_header = proxies
 isProxy = True                                      # 是否设置代理
 
 base_url = "http://w3.jbzcjsj.pw/pw/"           # 基础url
-save_path = "/root/resource/asian_nomosaic"     # 存储图片路径
+save_path = "/root/resource/asian_nomosaic"    # 存储图片路径
 fid = 5                                             # fid=5 表示亚洲无码
 page_start = 1                                      # 爬取的开始页
 page_end = 913                                      # 爬取的结束页

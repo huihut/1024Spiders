@@ -1,3 +1,5 @@
+#!/usr/bin/python
+#-*-coding:utf-8 -*-
 import _thread
 import multiprocessing
 import re
@@ -58,14 +60,14 @@ urllib.request.install_opener(opener)
 # 代理信息设置
 proxies = {'http': '127.0.0.1:1080', "https": "127.0.0.1:1080", }
 proxies_header = proxies
-isProxy = True
+isProxy = True                                                                  # 是否设置代理
 
-base_url = "http://w3.jbzcjsj.pw/pw/"
-save_path = "D:\\code\\Pycharm\\1024Spider\\torrent_asian_nomosaic"
-fid = 5
-page_start = 1
-page_end = 905
-thread_num = 1
+base_url = "http://w3.jbzcjsj.pw/pw/"                                       # 基础url
+save_path = "D:/code/Pycharm/1024Spider/torrent_asian_nomosaic"         # 存储图片路径
+fid = 5                                                                          # fid=5 表示亚洲无码
+page_start = 1                                                                   # 爬取的开始页
+page_end = 905                                                                   # 爬取的结束页
+thread_num = 1                                                                   # 线程数
 page_num = abs(page_end - page_start) + 1
 page_num_each_thread = page_num / thread_num
 
@@ -133,7 +135,7 @@ def Prase_Torrent(id, url, folder_path):
 # 每个帖子页面
 def Prase_Post(id, url, folder_name):
     try:
-        folder_path = save_path + '\\' + folder_name
+        folder_path = save_path + '/' + folder_name
         folder = os.path.exists(folder_path)
         if not folder:
             os.makedirs(folder_path)
@@ -179,19 +181,19 @@ def Prase_Post(id, url, folder_name):
                     if strlen != 0:
                         img_name = strlist[strlen - 1]
                         try:
-                            urllib.request.urlretrieve(obj, folder_path + '\\' + img_name)
+                            urllib.request.urlretrieve(obj, folder_path + '/' + img_name)
                         except Exception:
                             time.sleep(1)
-                            urllib.request.urlretrieve(obj, folder_path + '\\' + img_name)
+                            urllib.request.urlretrieve(obj, folder_path + '/' + img_name)
                         else:
-                            print("[" + str(id) + "] Successfully save the image to " + folder_path + '\\' + img_name)
+                            print("[" + str(id) + "] Successfully save the image to " + folder_path + '/' + img_name)
             else:
                 # 匹配失败
                 print("[" + str(id) + "] No match: " + str_content)
         # 保存到文件
         if magnet_link != '':
             result = result + '\n\n' + magnet_link
-        Save_Text(id, folder_path + '\\index.txt', result)
+        Save_Text(id, folder_path + '/index.txt', result)
     except Exception:
         print("[" + str(id) + "] Prase_Post Exception.")
 
@@ -245,8 +247,8 @@ def Work_thread(id):
         if id <= page_end:
             for each_page in range(id, page_end, thread_num):
                 list_return = Post_list(id, each_page)
-                if list_return == -1:
-                    break
+                # if list_return == -1:
+                #     break
                 prase_num = each_page / thread_num
                 print('[' + str(id) + '] [ ' + "{:.1f}".format(prase_num / page_num_each_thread * 100) + '% page completed ] ')
     except Exception:

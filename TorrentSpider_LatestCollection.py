@@ -1,3 +1,5 @@
+#!/usr/bin/python
+#-*-coding:utf-8 -*-
 import _thread
 import multiprocessing
 import re
@@ -59,14 +61,14 @@ urllib.request.install_opener(opener)
 # 代理信息设置
 proxies = {'http': '127.0.0.1:1080', "https": "127.0.0.1:1080", }
 proxies_header = proxies
-isProxy = True
+isProxy = True                                          # 是否设置代理
 
-base_url = "http://w3.jbzcjsj.pw/pw/"
-save_path = "D:\\code\\Pycharm\\1024Spider\\torrent"
-fid = 3
-page_start = 1
-page_end = 245
-thread_num = 1
+base_url = "http://w3.jbzcjsj.pw/pw/"                # 基础url
+save_path = "D:/code/Pycharm/1024Spider/torrent"   # 存储图片路径
+fid = 3                                                  # fid=3 表示最新合集
+page_start = 1                                           # 爬取的开始页
+page_end = 245                                           # 爬取的结束页
+thread_num = 1                                           # 线程数
 page_num = abs(page_end - page_start) + 1
 page_num_each_thread = page_num / thread_num
 
@@ -128,7 +130,7 @@ def Prase_Torrent(id, url, folder_path):
                 if strlen != 0:
                     torrent_name = strlist[strlen - 1]
                     if torrent_name != "":
-                        savePath = folder_path + "\\" + str(torrent_name).replace(u'\0', u'').replace(u'\t',
+                        savePath = folder_path + "/" + str(torrent_name).replace(u'\0', u'').replace(u'\t',
                                                                                                       u'') + ".txt"
                         Save_Text(id, savePath, magnet_link)
             else:
@@ -141,7 +143,7 @@ def Prase_Torrent(id, url, folder_path):
 # 每个帖子页面
 def Prase_Post(id, url, folder_name):
    try:
-       folder_path = save_path + '\\' + folder_name
+       folder_path = save_path + '/' + folder_name
        folder = os.path.exists(folder_path)
        if not folder:
            os.makedirs(folder_path)
@@ -163,7 +165,7 @@ def Prase_Post(id, url, folder_name):
            print("[" + str(id) + "] No match post.")
            return -1
        result = post_content[0].text
-       Save_Text(id, folder_path + '\\index.txt', result)
+       Save_Text(id, folder_path + '/index.txt', result)
        for content in post_content:
            str_content = str(content)
 
@@ -186,12 +188,12 @@ def Prase_Post(id, url, folder_name):
                    if strlen != 0:
                        img_name = strlist[strlen - 1]
                        try:
-                        urllib.request.urlretrieve(obj, folder_path + '\\' + img_name)
+                        urllib.request.urlretrieve(obj, folder_path + '/' + img_name)
                        except Exception:
                            time.sleep(1)
-                           urllib.request.urlretrieve(obj, folder_path + '\\' + img_name)
+                           urllib.request.urlretrieve(obj, folder_path + '/' + img_name)
                        else:
-                           print("[" + str(id) + "] Successfully save the image to " + folder_path + '\\' + img_name)
+                           print("[" + str(id) + "] Successfully save the image to " + folder_path + '/' + img_name)
            else:
                # 匹配失败
                print("[" + str(id) + "] No match: " + str_content)
@@ -245,8 +247,8 @@ def Work_thread(id):
         if id >= page_start and id <= page_end:
             for each_page in range(id, page_end, thread_num):
                 list_return = Post_list(id, each_page)
-                if list_return == -1:
-                    break
+                # if list_return == -1:
+                #     break
                 prase_num = each_page / thread_num
                 print(
                     '[' + str(id) + '] [ ' + "{:.1f}".format(prase_num / page_num_each_thread * 100) + '% page completed ] ')
@@ -263,4 +265,4 @@ if __name__ == "__main__":
     # p.join()
     # for i in range(1, thread_num + 1):
     #     _thread.start_new_thread(Work_thread, (i,))
-     Work_thread(1)
+    Work_thread(1)
