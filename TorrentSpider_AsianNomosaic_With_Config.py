@@ -21,7 +21,6 @@ class JsonCommand(object):
         try:
             with open('config.json', encoding='utf-8') as config_file:
                 _config = json.loads(config_file.read())
-            self.db = _config["db"]
             self.request_header = _config["_1024_req_header"]
             self.torrent_request_header = _config["_torrent_req_header"]
             self.proxies = _config["proxies"]
