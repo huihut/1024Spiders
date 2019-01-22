@@ -67,8 +67,6 @@ fid = 3                                                  # fid=3 表示最新合
 page_start = 1                                           # 爬取的开始页
 page_end = 245                                           # 爬取的结束页
 thread_num = 1                                           # 线程数
-page_num = abs(page_end - page_start) + 1
-page_num_each_thread = page_num / thread_num
 
 
 # 转换编码
@@ -93,7 +91,9 @@ def Save_Text(id, path, content):
         f = open(path, "w", encoding='utf-8')
         f.write(content)
     except IOError:
-        print("IOError: File open failed.")
+        print("[" + str(id) + "] IOError: File open failed.")
+    except Exception as e:
+        print("Save_Text Exception: " + str(e))
     else:
         # 内容写入文件成功
         print("[" + str(id) + "] Successfully save the file to " + path)
@@ -115,7 +115,7 @@ def Prase_Torrent(id, url, folder_path):
         torrent_content_num = len(torrent_content)
         if torrent_content_num == 0:
             print("[" + str(id) + "] No match torrent.")
-            return -1
+            return
         for content in torrent_content:
             str_content = str(content)
             # 匹配磁力链接
@@ -134,19 +134,13 @@ def Prase_Torrent(id, url, folder_path):
             else:
                 # 匹配失败
                 print("[" + str(id) + "] No match: " + str_content)
-    except Exception:
-        print("[" + str(id) + "] Prase_Torrent Exception.")
+    except Exception as e:
+        print("[" + str(id) + "] Prase_Torrent Exception: " + str(e))
 
 
 # 每个帖子页面
 def Prase_Post(id, url, folder_name):
    try:
-       folder_path = save_path + '/' + folder_name
-       folder = os.path.exists(folder_path)
-       if not folder:
-           os.makedirs(folder_path)
-           print("[" + str(id) + "] Created folder " + folder_name)
-
        if (isProxy == True):
            req = requests.get(url, params=request_header, proxies=proxies_header)
        else:
@@ -161,7 +155,16 @@ def Prase_Post(id, url, folder_name):
        post_content_num = len(post_content)
        if post_content_num == 0:
            print("[" + str(id) + "] No match post.")
-           return -1
+           return
+
+       # 创建保存的文件夹
+       folder_path = save_path + '/' + folder_name
+       folder = os.path.exists(folder_path)
+       if not folder:
+           os.makedirs(folder_path)
+           print("[" + str(id) + "] Created folder " + folder_name)
+
+       # 保存文本内容
        result = post_content[0].text
        Save_Text(id, folder_path + '/index.txt', result)
        for content in post_content:
@@ -186,17 +189,16 @@ def Prase_Post(id, url, folder_name):
                    if strlen != 0:
                        img_name = strlist[strlen - 1]
                        try:
-                        urllib.request.urlretrieve(obj, folder_path + '/' + img_name)
-                       except Exception:
-                           time.sleep(1)
-                           urllib.request.urlretrieve(obj, folder_path + '/' + img_name)
+                            urllib.request.urlretrieve(obj, folder_path + '/' + img_name)
+                       except Exception as e:
+                            print("[" + str(id) + "] Download the picture Exception: " + str(e))
                        else:
                            print("[" + str(id) + "] Successfully save the image to " + folder_path + '/' + img_name)
            else:
                # 匹配失败
                print("[" + str(id) + "] No match: " + str_content)
-   except Exception:
-       print("[" + str(id) + "] Prase_Post Exception.")
+   except Exception as e:
+       print("[" + str(id) + "] Prase_Post Exception: " + str(e))
 
 
 # 帖子列表页面
@@ -220,7 +222,7 @@ def Post_list(id, page):
         post_num = len(post_list)
         if post_num == 0:
             print("[" + str(id) + "] No match post_list.")
-            return -1
+            return
         for post in post_list:
             str_post = str(post)
             # 帖子网页的匹配
@@ -230,28 +232,35 @@ def Post_list(id, page):
                 post_name = matchObj.group(4)  # 文件夹名
                 if post_name != '':
                     # 匹配每个帖子
-                    if Prase_Post(id, base_url + post_url, post_name) == -1:
-                        return -1
+                    Prase_Post(id, base_url + post_url,
+                               post_name.replace(u'\0', u'').replace(u'/', u'.').replace(u'?',
+                                                                                         u'').replace(u'*',
+                                                                                                      u''))
             else:
                 # 匹配失败
                 print("[" + str(id) + "] No match: " + str_post)
-    except Exception:
-        print("[" + str(id) + "] Post_list Exception.")
+    except Exception as e:
+        print("[" + str(id) + "] Post_list Exception." + str(e))
 
 
 # 多线程下载
 def Work_thread(id):
     try:
-        if id >= page_start and id <= page_end:
-            for each_page in range(id, page_end, thread_num):
-                list_return = Post_list(id, each_page)
-                # if list_return == -1:
-                #     break
-                prase_num = each_page / thread_num
-                print(
-                    '[' + str(id) + '] [ ' + "{:.1f}".format(prase_num / page_num_each_thread * 100) + '% page completed ] ')
-    except Exception:
-        print("[" + str(id) + "] Work_thread Exception.")
+        if id <= page_end:
+            prase_num = 0
+            prase_more_one = 0
+            page_num = abs(page_end - page_start) + 1
+            if id <= int(page_num % thread_num):
+                prase_more_one = 1
+            page_num_each_thread = int(page_num / thread_num) + prase_more_one
+            for each_page in range(page_start + id - 1, page_end + 1, thread_num):
+                Post_list(id, each_page)
+                prase_num += 1
+                print('[' + str(id) + '] [ ' + "{:.1f}".format(
+                    prase_num / page_num_each_thread * 100) + '% page completed ] ')
+            print('[' + str(id) + '] completed !!!!!')
+    except Exception as e:
+        print("[" + str(id) + "] Work_thread Exception." + str(e))
 
 
 if __name__ == "__main__":

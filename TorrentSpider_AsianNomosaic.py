@@ -19,15 +19,14 @@ proxt_1024_req_header = {
     'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7',
     'Cache-Control': 'max-age=0',
     # 'Connection': 'keep - alive',
-    'Cookie': '__cfduid=d8a8419777cdc090aeacad5676c478c181548136023; UM_distinctid=16874190914afb' \
-                  '-02debbef036148-46564b55-1fa400-168741909152aa; CNZZDATA1261158850=1725766245-' \
-                  '1548135728-%7C1548135728; aafaf_threadlog=%2C7%2C5%2C110%2C18%2C106%2C14%2C22%2C; ' \
-                  'aafaf_readlog=%2C2024971%2C; aafaf_lastpos=F22; aafaf_lastvisit=2122%091548138145%09' \
-                  '%2Fpw%2Fthread.php%3Ffid-22-page-1.html; aafaf_ol_offset=32470944',
-    'Host': 'h3.cnmbtgf.info',
+    'Cookie': '__cfduid=d4e99b476e7372dec9a44b67f533f37aa1548178386; aafaf_lastvisit=0%091548178386%' \
+                  '09%2Fpw%2Fthread.php%3Ffid-5-page-5.html; aafaf_lastpos=F5; aafaf_threadlog=%2C5%2C; ' \
+                  'aafaf_ol_offset=32368318; UM_distinctid=168769f77ac958-0509e825886dfc-46564b55-1fa400-16876' \
+                  '9f77ad1302; CNZZDATA1261158850=393281613-1548174901-%7C1548174901',
+    'Host': 'w3.jbzcjsj.pw',
     # 'Pragma': 'no-cache',
     'Proxy-Connection': 'keep-alive',
-    'Referer': 'http://h3.cnmbtgf.info/pw/thread-htm-fid-22-page-2.html',
+    'Referer': 'http://w3.jbzcjsj.pw/pw/thread-htm-fid-5-page-5.html',
     'Upgrade-Insecure-Requests': '1',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)' \
                   ' Chrome/70.0.3538.102 Safari/537.36 OPR/57.0.3098.116'
@@ -41,14 +40,14 @@ proxt_torrent_req_header = {
     'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7',
     'Cache-Control': 'no-cache',
     # 'Connection': 'keep - alive',
-    'Cookie': '__cfduid=d941de1b4432ad5277d394ccf9eef5a521548136720; UM_distinctid=1687423abf6414' \
-                  '-0e3d3cc25c160b-46564b55-1fa400-1687423abf7b62; CNZZDATA1273152310=28791063-' \
-                  '1548133540-http%253A%252F%252Fh3.cnmbtgf.info%252F%7C1548133540; _ga=GA1.2.18' \
-                  '32968654.1548136721; _gid=GA1.2.1853650139.1548136721',
-    'Host': 'www1.downsx.net',
+    'Cookie': '__cfduid=d7f5104b5a516916674841b656d67dde31548178497; UM_distinctid=16876a1266dfb2-018bb685bad' \
+                  '0ed-46564b55-1fa400-16876a1266e1d2; CNZZDATA1273152310=501204684-1548176963-http%253A%2' \
+                  '52F%252Fw3.jbzcjsj.pw%252F%7C1548176963; _ga=GA1.2.1886522142.1548178499; _gid=GA1.2.16499' \
+                  '32666.1548178499; _gat=1',
+    'Host': 'www1.downsx.com',
     'Pragma': 'no-cache',
     'Proxy-Connection': 'keep-alive',
-    'Referer': 'http://h3.cnmbtgf.info/pw/html_data/22/1901/3863610.html',
+    'Referer': 'http://w3.jbzcjsj.pw/pw/html_data/5/1901/3863561.html',
     'Upgrade-Insecure-Requests': '1',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' \
               '(KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 OPR/57.0.3098.116'
@@ -68,10 +67,8 @@ base_url = "http://w3.jbzcjsj.pw/pw/"                                           
 save_path = "D:/code/Pycharm/1024Spider/torrent_asian_nomosaic"                  # 存储图片路径
 fid = 5                                                                          # fid=5 表示亚洲无码
 page_start = 1                                                                   # 爬取的开始页
-page_end = 925                                                                   # 爬取的结束页
+page_end = 928                                                                   # 爬取的结束页
 thread_num = 1                                                                   # 线程数
-page_num = abs(page_end - page_start) + 1
-page_num_each_thread = page_num / thread_num
 
 
 # 转换编码
@@ -139,12 +136,6 @@ def Prase_Torrent(id, url, folder_path):
 # 每个帖子页面
 def Prase_Post(id, url, folder_name):
     try:
-        folder_path = save_path + '/' + folder_name
-        folder = os.path.exists(folder_path)
-        if not folder:
-            os.makedirs(folder_path)
-            print("[" + str(id) + "] Created folder " + folder_name)
-
         if (isProxy == True):
             req = requests.get(url, params=request_header, proxies=proxies_header)
         else:
@@ -159,7 +150,15 @@ def Prase_Post(id, url, folder_name):
         post_content_num = len(post_content)
         if post_content_num == 0:
             print("[" + str(id) + "] No match post.")
-            return -1
+            return
+
+        # 创建保存的文件夹
+        folder_path = save_path + '/' + folder_name
+        folder = os.path.exists(folder_path)
+        if not folder:
+            os.makedirs(folder_path)
+            print("[" + str(id) + "] Created folder " + folder_name)
+
         # 保存文本内容
         result = post_content[0].text
         magnet_link = ''
@@ -187,10 +186,7 @@ def Prase_Post(id, url, folder_name):
                         try:
                             urllib.request.urlretrieve(obj, folder_path + '/' + img_name)
                         except Exception as e:
-                            print("[" + str(id) + "] Download the picture Exception: " + str(
-                                e) + ". Try to download again.")
-                            time.sleep(1)
-                            urllib.request.urlretrieve(obj, folder_path + '/' + img_name)
+                            print("[" + str(id) + "] Download the picture Exception: " + str(e))
                         else:
                             print("[" + str(id) + "] Successfully save the image to " + folder_path + '/' + img_name)
             else:
@@ -225,7 +221,7 @@ def Post_list(id, page):
         post_num = len(post_list)
         if post_num == 0:
             print("[" + str(id) + "] No match post_list.")
-            return -1
+            return
         for post in post_list:
             str_post = str(post)
             # html网页的匹配
@@ -235,11 +231,10 @@ def Post_list(id, page):
                 post_name = matchObj.group(4)  # 文件夹名
                 if post_name != '':
                     # 匹配每个帖子
-                    if Prase_Post(id, base_url + post_url,
-                                  post_name.replace(u'\0', u'').replace(u'/', u'.').replace(u'?',
-                                                                                            u'').replace(u'*',
-                                                                                                         u'')) == -1:
-                        return -1
+                    Prase_Post(id, base_url + post_url,
+                               post_name.replace(u'\0', u'').replace(u'/', u'.').replace(u'?',
+                                                                                         u'').replace(u'*',
+                                                                                                      u''))
             else:
                 # 匹配失败
                 print("[" + str(id) + "] No match: " + str_post)
@@ -251,14 +246,18 @@ def Post_list(id, page):
 def Work_thread(id):
     try:
         if id <= page_end:
-            for each_page in range(id, page_end, thread_num):
-                list_return = Post_list(id, each_page)
-                # if list_return == -1:
-                #     break
-                prase_num = each_page / thread_num
+            prase_num = 0
+            prase_more_one = 0
+            page_num = abs(page_end - page_start) + 1
+            if id <= int(page_num % thread_num):
+                prase_more_one = 1
+            page_num_each_thread = int(page_num / thread_num) + prase_more_one
+            for each_page in range(page_start + id - 1, page_end + 1, thread_num):
+                Post_list(id, each_page)
+                prase_num += 1
                 print('[' + str(id) + '] [ ' + "{:.1f}".format(
                     prase_num / page_num_each_thread * 100) + '% page completed ] ')
-            print('[' + str(id) + '] completed !!!!! ] ')
+            print('[' + str(id) + '] completed !!!!!')
     except Exception as e:
         print("[" + str(id) + "] Work_thread Exception." + str(e))
 

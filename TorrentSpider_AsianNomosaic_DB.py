@@ -67,8 +67,6 @@ fid = 5                                             # fid=5 表示亚洲无码
 page_start = 1                                      # 爬取的开始页
 page_end = 913                                      # 爬取的结束页
 thread_num = 1                                      # 线程数
-page_num = abs(page_end - page_start) + 1
-page_num_each_thread = page_num / thread_num
 mySQLCommand = object
 
 
@@ -84,7 +82,6 @@ class MySQLCommand(object):
         self.table_torrent = "AsianNomosaic"                       # 亚洲无码信息表
         self.table_pictures = "AsianNomosaicPictures"      # 亚洲无码图片表
 
-
     # 连接数据库
     def connect_mysql(self):
         try:
@@ -92,50 +89,44 @@ class MySQLCommand(object):
                                         passwd=self.password, db=self.db, charset='utf8')
             self.cursor = self.conn.cursor()
             return 0
-        except:
-            print('[error] connect mysql error.')
+        except Exception as e:
+            print('[error] connect mysql error.' + str(e))
             return -1
-
 
     # 查询数据
     def query_table(self, tablename):
         sql = "SELECT * FROM " + tablename
-
         try:
             self.cursor.execute(sql)
             row = self.cursor.fetchone()
             print(row)
             print(self.cursor.rowcount)
-
-        except:
-            print("Failed to " + sql)
-
+        except Exception as e:
+            print("Failed to " + sql + str(e))
 
     def query_table_torrent(self):
         self.query_table(self.table_torrent)
 
-
     def query_table_pictures(self):
         self.query_table(self.table_pictures)
 
-
     # 插入到 table_torrent 返回刚插入的项的主键
     def insert_table_torrent(self, data='', name='', summary='', magnet=''):
-        sql = "INSERT INTO " + self.table_torrent + " (data, name, summary, magnet) VALUES ('" + data + "', '" + name + "', '" + summary + "', '" + magnet + "')"
+        sql = "INSERT INTO " + self.table_torrent + " (data, name, summary, magnet) VALUES ('" + data + "', '" + \
+              name + "', '" + summary + "', '" + magnet + "')"
         try:
             self.cursor.execute(sql)
             self.conn.commit()
             print("Successfully insert " + name + " into " + self.table_torrent)
-        except:
-            print("Failed to " + sql)
+        except Exception as e:
+            print("Failed to " + sql + str(e))
         try:
             an_id = -1
             an_id = self.cursor.lastrowid
             if an_id != -1:
                 return an_id
-        except:
-            print("Failed to return last_insert_id.")
-
+        except Exception as e:
+            print("Failed to return last_insert_id." + str(e))
 
     # 插入到 table_pictures
     def insert_table_pictures(self, an_id='', name=''):
@@ -144,16 +135,15 @@ class MySQLCommand(object):
             self.cursor.execute(sql)
             self.conn.commit()
             print("Successfully insert " + name + " into " + self.table_pictures)
-        except:
-            print("Failed to " + sql)
+        except Exception as e:
+            print("Failed to " + sql + str(e))
 
-
-    def closeMysql(self):
+    def close_mysql(self):
         try:
             self.cursor.close()
             self.conn.close()
-        except:
-            print("Failed to close mysql.")
+        except Exception as e:
+            print("Failed to close mysql." + str(e))
 
 
 # 转换编码
@@ -179,6 +169,8 @@ def Save_Text(id, path, content):
         f.write(content)
     except IOError:
         print("[" + str(id) + "] IOError: File open failed.")
+    except Exception as e:
+        print("Save_Text Exception: " + str(e))
     else:
         # 内容写入文件成功
         print("[" + str(id) + "] Successfully save the file to " + path)
@@ -212,8 +204,8 @@ def Prase_Torrent(id, url):
                 # 匹配失败
                 print("[" + str(id) + "] No match: " + str_content)
                 return ''
-    except Exception:
-        print("[" + str(id) + "] Prase_Torrent Exception.")
+    except Exception as e:
+        print("[" + str(id) + "] Prase_Torrent Exception: " + str(e))
 
 
 # 每个帖子页面
@@ -242,7 +234,7 @@ def Prase_Post(id, url, folder_name):
         post_content_num = len(post_content)
         if post_content_num == 0:
             print("[" + str(id) + "] No match post.")
-            return -1
+            return
 
         # 保存文本内容
         summary = post_content[0].text
@@ -258,7 +250,7 @@ def Prase_Post(id, url, folder_name):
             # 匹配种子失败
             print("[" + str(id) + "] No match: " + str_content)
 
-        # 插入到数据库：AsianNomosaic 表
+        # 插入到数据库：insert_table_torrent 表
         an_id = -1
         if folder_name != '' and magnet_link != '':
             an_id = mySQLCommand.insert_table_torrent(data=data, name=folder_name, summary=summary, magnet=magnet_link)
@@ -282,18 +274,17 @@ def Prase_Post(id, url, folder_name):
                         img_name = strlist[strlen - 1]
                         try:
                             urllib.request.urlretrieve(obj, folder_path + '/' + img_name)
-                        except Exception:
-                            time.sleep(1)
-                            urllib.request.urlretrieve(obj, folder_path + '/' + img_name)
+                        except Exception as e:
+                            print("[" + str(id) + "] Download the picture Exception: " + str(e))
                         else:
                             print("[" + str(id) + "] Successfully save the image to " + folder_path + '/' + img_name)
-                            # 插入数据库：AsianNomosaicPictures 表
+                            # 插入数据库： insert_table_pictures 表
                             mySQLCommand.insert_table_pictures(an_id=an_id, name=img_name)
             else:
                 # 匹配失败
                 print("[" + str(id) + "] No match: " + str_content)
-    except Exception:
-        print("[" + str(id) + "] Prase_Post Exception.")
+    except Exception as e:
+        print("[" + str(id) + "] Prase_Post Exception: " + str(e))
 
 
 # 帖子列表页面
@@ -317,7 +308,7 @@ def Post_list(id, page):
         post_num = len(post_list)
         if post_num == 0:
             print("[" + str(id) + "] No match post_list.")
-            return -1
+            return
         for post in post_list:
             str_post = str(post)
             # html网页的匹配
@@ -327,30 +318,35 @@ def Post_list(id, page):
                 post_name = matchObj.group(4)  # 文件夹名
                 if post_name != '':
                     # 匹配每个帖子
-                    if Prase_Post(id, base_url + post_url,
-                                  post_name.replace(u'\0', u'').replace(u'/', u'.').replace(u'?',
-                                                                                            u'').replace(u'*',
-                                                                                                         u'')) == -1:
-                        return -1
+                    Prase_Post(id, base_url + post_url,
+                               post_name.replace(u'\0', u'').replace(u'/', u'.').replace(u'?',
+                                                                                         u'').replace(u'*',
+                                                                                                      u''))
             else:
                 # 匹配失败
                 print("[" + str(id) + "] No match: " + str_post)
-    except Exception:
-        print("[" + str(id) + "] Post_list Exception.")
+    except Exception as e:
+        print("[" + str(id) + "] Post_list Exception." + str(e))
 
 
 # 多线程下载
 def Work_thread(id):
     try:
         if id <= page_end:
-            for each_page in range(id, page_end, thread_num):
-                list_return = Post_list(id, each_page)
-                #if list_return == -1:
-                #    break
-                prase_num = each_page / thread_num
-                print('[' + str(id) + '] [ ' + "{:.1f}".format(prase_num / page_num_each_thread * 100) + '% page completed ] ')
-    except Exception:
-        print("[" + str(id) + "] Work_thread Exception.")
+            prase_num = 0
+            prase_more_one = 0
+            page_num = abs(page_end - page_start) + 1
+            if id <= int(page_num % thread_num):
+                prase_more_one = 1
+            page_num_each_thread = int(page_num / thread_num) + prase_more_one
+            for each_page in range(page_start + id - 1, page_end + 1, thread_num):
+                Post_list(id, each_page)
+                prase_num += 1
+                print('[' + str(id) + '] [ ' + "{:.1f}".format(
+                    prase_num / page_num_each_thread * 100) + '% page completed ] ')
+            print('[' + str(id) + '] completed !!!!!')
+    except Exception as e:
+        print("[" + str(id) + "] Work_thread Exception." + str(e))
 
 
 if __name__ == "__main__":
@@ -367,4 +363,4 @@ if __name__ == "__main__":
             print("Start_new_thread Exception: " + str(e))
         while 1:
             pass
-        mySQLCommand.closeMysql()
+        mySQLCommand.close_mysql()

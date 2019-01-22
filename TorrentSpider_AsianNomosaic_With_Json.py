@@ -29,8 +29,6 @@ class JsonCommand(object):
             self.page_start = int(_config["page_start"])
             self.page_end = int(_config["page_end"])
             self.thread_num = int(_config["thread_num"])
-            self.page_num = abs(self.page_end - self.page_start) + 1
-            self.page_num_each_thread = self.page_num / self.thread_num
             self.user_agent = _config["_1024_req_header"]["User-Agent"]
             config_file.close()
         except Exception as e:
@@ -102,12 +100,6 @@ def Prase_Torrent(id, url, folder_path):
 # 每个帖子页面
 def Prase_Post(id, url, folder_name):
     try:
-        folder_path = config.save_path + '/' + folder_name
-        folder = os.path.exists(folder_path)
-        if not folder:
-            os.makedirs(folder_path)
-            print("[" + str(id) + "] Created folder " + folder_name)
-
         if (config.is_proxy == True):
             req = requests.get(url, params=config.request_header, proxies=config.proxies)
         else:
@@ -122,7 +114,15 @@ def Prase_Post(id, url, folder_name):
         post_content_num = len(post_content)
         if post_content_num == 0:
             print("[" + str(id) + "] No match post.")
-            return -1
+            return
+
+        # 创建保存的文件夹
+        folder_path = config.save_path + '/' + folder_name
+        folder = os.path.exists(folder_path)
+        if not folder:
+            os.makedirs(folder_path)
+            print("[" + str(id) + "] Created folder " + folder_name)
+
         # 保存文本内容
         result = post_content[0].text
         magnet_link = ''
@@ -148,8 +148,7 @@ def Prase_Post(id, url, folder_name):
                     if strlen != 0:
                         img_name = strlist[strlen - 1]
                         try:
-                            img_path = folder_path + '/' + img_name
-                            urllib.request.urlretrieve(url=obj, filename=img_path)
+                            urllib.request.urlretrieve(obj, folder_path + '/' + img_name)
                         except Exception as e:
                             print("[" + str(id) + "] Download the picture Exception: " + str(e))
                         else:
@@ -186,7 +185,7 @@ def Post_list(id, page):
         post_num = len(post_list)
         if post_num == 0:
             print("[" + str(id) + "] No match post_list.")
-            return -1
+            return
         for post in post_list:
             str_post = str(post)
             # html网页的匹配
@@ -196,11 +195,10 @@ def Post_list(id, page):
                 post_name = matchObj.group(4)  # 文件夹名
                 if post_name != '':
                     # 匹配每个帖子
-                    if Prase_Post(id, config.base_url + post_url,
-                                  post_name.replace(u'\0', u'').replace(u'/', u'.').replace(u'?',
-                                                                                            u'').replace(u'*',
-                                                                                                         u'')) == -1:
-                        return -1
+                    Prase_Post(id, config.base_url + post_url,
+                               post_name.replace(u'\0', u'').replace(u'/', u'.').replace(u'?',
+                                                                                         u'').replace(u'*',
+                                                                                                      u''))
             else:
                 # 匹配失败
                 print("[" + str(id) + "] No match: " + str_post)
@@ -212,10 +210,18 @@ def Post_list(id, page):
 def Work_thread(id):
     try:
         if id <= config.page_end:
-            for each_page in range(id, config.page_end, config.thread_num):
+            prase_num = 0
+            prase_more_one = 0
+            page_num = abs(config.page_end - config.page_start) + 1
+            if id <= int(page_num % config.thread_num):
+                prase_more_one = 1
+            page_num_each_thread = int(page_num / config.thread_num) + prase_more_one
+            for each_page in range(config.page_start + id - 1, config.page_end + 1, config.thread_num):
                 Post_list(id, each_page)
-                prase_num = each_page / config.thread_num
-                print('[' + str(id) + '] [ ' + "{:.1f}".format(prase_num / config.page_num_each_thread * 100) + '% page completed ] ')
+                prase_num += 1
+                print('[' + str(id) + '] [ ' + "{:.1f}".format(
+                    prase_num / page_num_each_thread * 100) + '% page completed ] ')
+            print('[' + str(id) + '] completed !!!!!')
     except Exception as e:
         print("[" + str(id) + "] Work_thread Exception." + str(e))
 
