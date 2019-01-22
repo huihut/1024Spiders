@@ -165,7 +165,7 @@ def Prase_Post(id, url, folder_name):
         print("[" + str(id) + "] Prase_Post Exception: " + str(e))
 
 
-# 亚洲无码帖子列表页面
+# 帖子列表页面
 def Post_list(id, page):
     try:
         post_url = config.base_url + 'thread-htm-fid-' + str(config.fid) + '-page-' + str(page) + '.html'

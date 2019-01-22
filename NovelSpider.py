@@ -204,5 +204,4 @@ if __name__ == "__main__":
     isProxy = False      # 是否设置代理
 
     spider(directory_url, fid, page_start, page_end, html_chapter_url, proxt_novel_list_req_header, save_path)
-
-# main()
+    

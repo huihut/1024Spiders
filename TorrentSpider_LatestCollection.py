@@ -199,7 +199,7 @@ def Prase_Post(id, url, folder_name):
        print("[" + str(id) + "] Prase_Post Exception.")
 
 
-# 最新合集帖子列表页面
+# 帖子列表页面
 def Post_list(id, page):
     try:
         post_url = base_url + 'thread-htm-fid-' + str(fid) + '-page-' + str(page) + '.html'
