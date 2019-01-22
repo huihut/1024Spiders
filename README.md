@@ -74,5 +74,4 @@ mysql> desc AsianNomosaicPictures;
 | name  | char(255) | NO   |     | NULL    |                |       # picture name
 +-------+-----------+------+-----+---------+----------------+
 3 rows in set (0.00 sec)
-
 ```
