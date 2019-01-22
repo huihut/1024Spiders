@@ -39,7 +39,7 @@ nohup python3 -u TorrentSpider_AsianNomosaic_DB.py > TorrentSpider_AsianNomosaic
 
 ## Database
 
-```angular2html
+```mysql
 mysql> show tables;
 +-------------------------+
 | Tables_in_torrent       |
