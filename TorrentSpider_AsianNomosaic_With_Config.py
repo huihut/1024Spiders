@@ -1,14 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #-*-coding:utf-8 -*-
 import _thread
-import multiprocessing
 import re
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlencode, parse_qs, urlsplit, urlunsplit
 from urllib.request import urlretrieve
 import urllib.request
-from multiprocessing import Pool
 import os
 import json
 
@@ -223,16 +221,17 @@ def Work_thread(id):
 
 
 if __name__ == "__main__":
-    # p = multiprocessing.Pool(processes=thread_num)
-    # for i in range(1, thread_num + 1):
-    #     print(i)
-    #     p.apply_async(Work_thread, args=(i,))
-    # p.close()
-    # p.join()
-    # for i in range(1, thread_num + 1):
-    #     _thread.start_new_thread(Work_thread, (i,))
     config = JsonCommand()
     opener = urllib.request.build_opener()
     opener.addheaders = [(config.user_agent)]
     urllib.request.install_opener(opener)
-    Work_thread(1)
+    # 单线程
+    # Work_thread(1)
+    # 多线程
+    try:
+        for i in range(1, config.thread_num + 1):
+            _thread.start_new_thread(Work_thread, (i,))
+    except Exception as e:
+        print("Start_new_thread Exception: " + str(e))
+    while 1:
+        pass

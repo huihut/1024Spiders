@@ -9,8 +9,7 @@ from urllib.request import urlretrieve
 import urllib.request
 import os
 import time
-import threading
-
+import pymysql
 
 # 1024网站请求头
 proxt_1024_req_header = {
@@ -62,16 +61,101 @@ urllib.request.install_opener(opener)
 # 代理信息设置
 proxies = {'http': '127.0.0.1:1080', "https": "127.0.0.1:1080", }
 proxies_header = proxies
-isProxy = True                                                                  # 是否设置代理
+isProxy = True                                      # 是否设置代理
 
-base_url = "http://w3.jbzcjsj.pw/pw/"                                           # 基础url
-save_path = "D:/code/Pycharm/1024Spider/torrent_asian_nomosaic"                  # 存储图片路径
-fid = 5                                                                          # fid=5 表示亚洲无码
-page_start = 1                                                                   # 爬取的开始页
-page_end = 925                                                                   # 爬取的结束页
-thread_num = 1                                                                   # 线程数
+base_url = "http://h3.cnmbtgf.info/pw/"           # 基础url
+save_path = "D:/code/Pycharm/1024Spider/torrent_japanese_cavalry"    # 存储图片路径
+fid = 22                                             # fid=22 表示日本骑兵
+page_start = 1                                      # 爬取的开始页
+page_end = 1332                                      # 爬取的结束页
+thread_num = 1                                      # 线程数
 page_num = abs(page_end - page_start) + 1
 page_num_each_thread = page_num / thread_num
+mySQLCommand = object
+
+
+# 用来操作数据库的类
+class MySQLCommand(object):
+    # 类的初始化
+    def __init__(self):
+        self.host = ''          # 主机，本地填 127.0.0.1
+        self.port = 3306        # 数据端口号
+        self.user = ''          # 数据库用户名
+        self.password = ""      # 数据库密码
+        self.db = ""            # 数据库名
+        self.table_torrent = "JapaneseCavalry"                   # 日本骑兵信息表
+        self.table_pictures = "JapaneseCavalryPictures"          # 日本骑兵图片表
+
+
+    # 连接数据库
+    def connect_mysql(self):
+        try:
+            self.conn = pymysql.connect(host=self.host, port=self.port, user=self.user,
+                                        passwd=self.password, db=self.db, charset='utf8')
+            self.cursor = self.conn.cursor()
+            return 0
+        except Exception as e:
+            print('[error] connect mysql error.' + str(e))
+            return -1
+
+
+    # 查询数据
+    def query_table(self, tablename):
+        sql = "SELECT * FROM " + tablename
+
+        try:
+            self.cursor.execute(sql)
+            row = self.cursor.fetchone()
+            print(row)
+            print(self.cursor.rowcount)
+
+        except Exception as e:
+            print("Failed to " + sql + str(e))
+
+
+    def query_table_torrent(self):
+        self.query_table(self.table_torrent)
+
+
+    def query_table_pictures(self):
+        self.query_table(self.table_pictures)
+
+
+    # 插入到 table_torrent 返回刚插入的项的主键
+    def insert_table_torrent(self, data='', name='', summary='', magnet=''):
+        sql = "INSERT INTO " + self.table_torrent + " (data, name, summary, magnet) VALUES ('" + data + "', '" + name + "', '" + summary + "', '" + magnet + "')"
+        try:
+            self.cursor.execute(sql)
+            self.conn.commit()
+            print("Successfully insert " + name + " into " + self.table_torrent)
+        except Exception as e:
+            print("Failed to " + sql + str(e))
+        try:
+            an_id = -1
+            an_id = self.cursor.lastrowid
+            if an_id != -1:
+                return an_id
+        except Exception as e:
+            print("Failed to return last_insert_id." + str(e))
+
+
+    # 插入到 table_pictures
+    def insert_table_pictures(self, an_id='', name=''):
+        sql = "INSERT INTO " + self.table_pictures + " (an_id, name) VALUES ('" + str(an_id) + "', '" + name + "')"
+        try:
+            self.cursor.execute(sql)
+            self.conn.commit()
+            print("Successfully insert " + name + " into " + self.table_pictures)
+        except Exception as e:
+            print("Failed to " + sql + str(e))
+
+
+    def closeMysql(self):
+        try:
+            self.cursor.close()
+            self.conn.close()
+        except Exception as e:
+            print("Failed to close mysql." + str(e))
 
 
 # 转换编码
@@ -106,7 +190,7 @@ def Save_Text(id, path, content):
 
 
 # 种子/磁力链接页面
-def Prase_Torrent(id, url, folder_path):
+def Prase_Torrent(id, url):
     try:
         if (isProxy == True):
             req = requests.get(url, params=torrent_request_header, proxies=proxies_header)
@@ -139,11 +223,14 @@ def Prase_Torrent(id, url, folder_path):
 # 每个帖子页面
 def Prase_Post(id, url, folder_name):
     try:
-        folder_path = save_path + '/' + folder_name
-        folder = os.path.exists(folder_path)
-        if not folder:
-            os.makedirs(folder_path)
-            print("[" + str(id) + "] Created folder " + folder_name)
+        # 匹配日期
+        data = ''
+        matchObj = re.search(r'\[(.*?)\]', folder_name, re.M | re.I)
+        if matchObj:
+            data = matchObj.group(1)  # 文件夹名
+        else:
+            # 匹配失败
+            print("[" + str(id) + "] No match: " + folder_name)
 
         if (isProxy == True):
             req = requests.get(url, params=request_header, proxies=proxies_header)
@@ -160,20 +247,33 @@ def Prase_Post(id, url, folder_name):
         if post_content_num == 0:
             print("[" + str(id) + "] No match post.")
             return -1
-        # 保存文本内容
-        result = post_content[0].text
-        magnet_link = ''
-        for content in post_content:
-            str_content = str(content)
 
-            # 匹配种子
-            matchObj = re.findall(r'href="(.*?)"', str_content)
-            if matchObj:
-                for obj in matchObj:
-                    magnet_link = Prase_Torrent(id, obj, folder_path)
-            else:
-                # 匹配失败
-                print("[" + str(id) + "] No match: " + str_content)
+        # 保存文本内容
+        summary = post_content[0].text
+        str_content = str(post_content[0])
+
+        # 匹配种子
+        magnet_link = ''
+        matchObj = re.findall(r'href="(.*?)"', str_content)
+        if matchObj:
+            for obj in matchObj:
+                magnet_link = Prase_Torrent(id, obj)
+        else:
+            # 匹配种子失败
+            print("[" + str(id) + "] No match: " + str_content)
+
+        # 插入到数据库：AsianNomosaic 表
+        an_id = -1
+        if folder_name != '' and magnet_link != '':
+            an_id = mySQLCommand.insert_table_torrent(data=data, name=folder_name, summary=summary, magnet=magnet_link)
+
+        if an_id != -1:
+            # 创建保存图片的文件夹
+            folder_path = save_path + '/' + str(an_id)
+            folder = os.path.exists(folder_path)
+            if not folder:
+                os.makedirs(folder_path)
+                print("[" + str(id) + "] Created folder " + str(an_id))
 
             # 匹配图片
             matchObj = re.findall(r'window.open\(\'(.*?)\'\);', str_content)
@@ -187,24 +287,21 @@ def Prase_Post(id, url, folder_name):
                         try:
                             urllib.request.urlretrieve(obj, folder_path + '/' + img_name)
                         except Exception as e:
-                            print("[" + str(id) + "] Download the picture Exception: " + str(
-                                e) + ". Try to download again.")
+                            print("[" + str(id) + "] Download the picture Exception: " + str(e) + ". Try to download again.")
                             time.sleep(1)
                             urllib.request.urlretrieve(obj, folder_path + '/' + img_name)
                         else:
                             print("[" + str(id) + "] Successfully save the image to " + folder_path + '/' + img_name)
+                            # 插入数据库：AsianNomosaicPictures 表
+                            mySQLCommand.insert_table_pictures(an_id=an_id, name=img_name)
             else:
                 # 匹配失败
                 print("[" + str(id) + "] No match: " + str_content)
-        # 保存到文件
-        if magnet_link != '':
-            result = result + '\n\n' + magnet_link
-        Save_Text(id, folder_path + '/index.txt', result)
     except Exception as e:
         print("[" + str(id) + "] Prase_Post Exception: " + str(e))
 
 
-# 亚洲无码帖子列表页面
+# 帖子列表页面
 def Post_list(id, page):
     try:
         post_url = base_url + 'thread-htm-fid-' + str(fid) + '-page-' + str(page) + '.html'
@@ -253,25 +350,26 @@ def Work_thread(id):
         if id <= page_end:
             for each_page in range(id, page_end, thread_num):
                 list_return = Post_list(id, each_page)
-                # if list_return == -1:
-                #     break
+                #if list_return == -1:
+                #    break
                 prase_num = each_page / thread_num
-                print('[' + str(id) + '] [ ' + "{:.1f}".format(
-                    prase_num / page_num_each_thread * 100) + '% page completed ] ')
-            print('[' + str(id) + '] completed !!!!! ] ')
-            threading.Lock.release()
+                print('[' + str(id) + '] [ ' + "{:.1f}".format(prase_num / page_num_each_thread * 100) + '% page completed ] ')
     except Exception as e:
         print("[" + str(id) + "] Work_thread Exception." + str(e))
 
 
 if __name__ == "__main__":
-    # 单线程
-    # Work_thread(1)
-    # 多线程
-    try:
-        for i in range(1, thread_num + 1):
-            _thread.start_new_thread(Work_thread, (i,))
-    except Exception as e:
-        print("Start_new_thread Exception: " + str(e))
-    while 1:
-        pass
+    # 创建数据库操作类的实例
+    mySQLCommand = MySQLCommand()
+    if mySQLCommand.connect_mysql() != -1:
+        # 单线程
+        # Work_thread(1)
+        # 多线程
+        try:
+            for i in range(1, thread_num + 1):
+                _thread.start_new_thread(Work_thread, (i,))
+        except Exception as e:
+            print("Start_new_thread Exception: " + str(e))
+        while 1:
+            pass
+        mySQLCommand.closeMysql()

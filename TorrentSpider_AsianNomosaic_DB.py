@@ -1,14 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #-*-coding:utf-8 -*-
 import _thread
-import multiprocessing
 import re
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlencode, parse_qs, urlsplit, urlunsplit
 from urllib.request import urlretrieve
 import urllib.request
-from multiprocessing import Pool
 import os
 import time
 import pymysql
@@ -64,7 +62,7 @@ proxies_header = proxies
 isProxy = True                                      # 是否设置代理
 
 base_url = "http://w3.jbzcjsj.pw/pw/"           # 基础url
-save_path = "/root/resource/asian_nomosaic"    # 存储图片路径
+save_path = "D:/code/Pycharm/1024Spider/torrent_asian_nomosaic"    # 存储图片路径
 fid = 5                                             # fid=5 表示亚洲无码
 page_start = 1                                      # 爬取的开始页
 page_end = 913                                      # 爬取的结束页
@@ -356,17 +354,17 @@ def Work_thread(id):
 
 
 if __name__ == "__main__":
-    # p = multiprocessing.Pool(processes=thread_num)
-    # for i in range(1, thread_num + 1):
-    #     print(i)
-    #     p.apply_async(Work_thread, args=(i,))
-    # p.close()
-    # p.join()
-    # for i in range(1, thread_num + 1):
-    #     _thread.start_new_thread(Work_thread, (i,))
-
     # 创建数据库操作类的实例
     mySQLCommand = MySQLCommand()
     if mySQLCommand.connect_mysql() != -1:
-        Work_thread(1)
+        # 单线程
+        # Work_thread(1)
+        # 多线程
+        try:
+            for i in range(1, thread_num + 1):
+                _thread.start_new_thread(Work_thread, (i,))
+        except Exception as e:
+            print("Start_new_thread Exception: " + str(e))
+        while 1:
+            pass
         mySQLCommand.closeMysql()
