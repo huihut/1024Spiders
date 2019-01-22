@@ -2,8 +2,8 @@
 
 Some 1024 spiders, crawling porn information and magnet-link, inserting the database.
 
-* Python 3.6.3
-* MySQL 8.0.14
+* Python 3.6
+* MySQL 8.0
 
 ## Deploy
 
@@ -11,7 +11,7 @@ Some 1024 spiders, crawling porn information and magnet-link, inserting the data
 
 ```
 git clone git@github.com:huihut/1024Spider.git
-cd 1024Spider && pip3 install -r requirements.txt
+cd 1024Spider && pip install -r requirements.txt
 ```
 
 ### Configure
@@ -28,13 +28,13 @@ cd 1024Spider && pip3 install -r requirements.txt
 ### Run front-end process
 
 ```
-python3 TorrentSpider_AsianNomosaic_DB.py
+python TorrentSpider_AsianNomosaic_DB.py
 ```
 
 ### Run background process
 
 ```
-nohup python3 -u TorrentSpider_AsianNomosaic_DB.py > TorrentSpider_AsianNomosaic_DB.log 2>&1 &
+nohup python -u TorrentSpider_AsianNomosaic_DB.py > TorrentSpider_AsianNomosaic_DB.log 2>&1 &
 ```
 
 ## Database

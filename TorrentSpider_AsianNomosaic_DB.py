@@ -81,8 +81,8 @@ class MySQLCommand(object):
         self.user = ''          # 数据库用户名
         self.password = ""      # 数据库密码
         self.db = ""            # 数据库名
-        self.table_AsianNomosaic = "AsianNomosaic"                       # 亚洲无码信息表
-        self.table_AsianNomosaicPictures = "AsianNomosaicPictures"      # 亚洲无码图片表
+        self.table_torrent = "AsianNomosaic"                       # 亚洲无码信息表
+        self.table_pictures = "AsianNomosaicPictures"      # 亚洲无码图片表
 
 
     # 连接数据库
@@ -111,21 +111,21 @@ class MySQLCommand(object):
             print("Failed to " + sql)
 
 
-    def query_table_AsianNomosaic(self):
-        self.query_table(self.table_AsianNomosaic)
+    def query_table_torrent(self):
+        self.query_table(self.table_torrent)
 
 
-    def query_table_AsianNomosaicPictures(self):
-        self.query_table(self.table_AsianNomosaicPictures)
+    def query_table_pictures(self):
+        self.query_table(self.table_pictures)
 
 
-    # 插入到 AsianNomosaic 返回刚插入的项的主键
-    def insert_table_AsianNomosaic(self, data='', name='', summary='', magnet=''):
-        sql = "INSERT INTO " + self.table_AsianNomosaic + " (data, name, summary, magnet) VALUES ('" + data + "', '" + name +"', '" + summary +"', '" + magnet + "')"
+    # 插入到 table_torrent 返回刚插入的项的主键
+    def insert_table_torrent(self, data='', name='', summary='', magnet=''):
+        sql = "INSERT INTO " + self.table_torrent + " (data, name, summary, magnet) VALUES ('" + data + "', '" + name + "', '" + summary + "', '" + magnet + "')"
         try:
             self.cursor.execute(sql)
             self.conn.commit()
-            print("Successfully insert" + name + " into AsianNomosaic.")
+            print("Successfully insert " + name + " into " + self.table_torrent)
         except:
             print("Failed to " + sql)
         try:
@@ -137,13 +137,13 @@ class MySQLCommand(object):
             print("Failed to return last_insert_id.")
 
 
-    # 插入到 insert_table_AsianNomosaicPictures
-    def insert_table_AsianNomosaicPictures(self, an_id='', name=''):
-        sql = "INSERT INTO " + self.table_AsianNomosaicPictures + " (an_id, name) VALUES ('" + str(an_id) + "', '" + name + "')"
+    # 插入到 table_pictures
+    def insert_table_pictures(self, an_id='', name=''):
+        sql = "INSERT INTO " + self.table_pictures + " (an_id, name) VALUES ('" + str(an_id) + "', '" + name + "')"
         try:
             self.cursor.execute(sql)
             self.conn.commit()
-            print("Successfully insert" + name + " into AsianNomosaicPictures.")
+            print("Successfully insert " + name + " into " + self.table_pictures)
         except:
             print("Failed to " + sql)
 
@@ -261,7 +261,7 @@ def Prase_Post(id, url, folder_name):
         # 插入到数据库：AsianNomosaic 表
         an_id = -1
         if folder_name != '' and magnet_link != '':
-            an_id = mySQLCommand.insert_table_AsianNomosaic(data=data ,name=folder_name, summary=summary, magnet=magnet_link)
+            an_id = mySQLCommand.insert_table_torrent(data=data, name=folder_name, summary=summary, magnet=magnet_link)
 
         if an_id != -1:
             # 创建保存图片的文件夹
@@ -288,7 +288,7 @@ def Prase_Post(id, url, folder_name):
                         else:
                             print("[" + str(id) + "] Successfully save the image to " + folder_path + '/' + img_name)
                             # 插入数据库：AsianNomosaicPictures 表
-                            mySQLCommand.insert_table_AsianNomosaicPictures(an_id=an_id, name=img_name)
+                            mySQLCommand.insert_table_pictures(an_id=an_id, name=img_name)
             else:
                 # 匹配失败
                 print("[" + str(id) + "] No match: " + str_content)

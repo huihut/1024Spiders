@@ -259,7 +259,6 @@ def Work_thread(id):
                 print('[' + str(id) + '] [ ' + "{:.1f}".format(
                     prase_num / page_num_each_thread * 100) + '% page completed ] ')
             print('[' + str(id) + '] completed !!!!! ] ')
-            threading.Lock.release()
     except Exception as e:
         print("[" + str(id) + "] Work_thread Exception." + str(e))
 
