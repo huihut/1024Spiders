@@ -37,7 +37,7 @@
         "http": "127.0.0.1:1080",
         "https": "127.0.0.1:1080"
     },
-    "is_proxy": "True",
+    "is_proxy": "False",
     "fid": "5",
     "base_url": "http://w3.jbzcjsj.pw/pw/",
     "save_path": "D:/code/Pycharm/1024Spider/torrent_asian_nomosaic",

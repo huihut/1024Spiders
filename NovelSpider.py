@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 import urllib
 import urllib.parse
@@ -201,7 +201,7 @@ if __name__ == "__main__":
     fid = 17            # 网站帖子类型，17代表小说
     page_start = 1      # 小说目录开始页面
     page_end = 940      # 小说目录结束页面
-    isProxy = True      # 是否设置代理
+    isProxy = False      # 是否设置代理
 
     spider(directory_url, fid, page_start, page_end, html_chapter_url, proxt_novel_list_req_header, save_path)
 

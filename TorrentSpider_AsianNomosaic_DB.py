@@ -59,7 +59,7 @@ urllib.request.install_opener(opener)
 # 代理信息设置
 proxies = {'http': '127.0.0.1:1080', "https": "127.0.0.1:1080", }
 proxies_header = proxies
-isProxy = True                                      # 是否设置代理
+isProxy = False                                      # 是否设置代理
 
 base_url = "http://w3.jbzcjsj.pw/pw/"           # 基础url
 save_path = "D:/code/Pycharm/1024Spider/torrent_asian_nomosaic"    # 存储图片路径
