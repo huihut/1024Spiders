@@ -1,6 +1,6 @@
 # 1024 Spider
 
-Some 1024 spiders, crawling porn information and magnet url, inserting the database.
+Some 1024 spiders, crawling porn information and magnet-link, inserting the database.
 
 * Python 3.6.3
 * MySQL 8.0.14
@@ -61,7 +61,7 @@ mysql> desc AsianNomosaic;
 | data    | char(10)  | YES  |     | NULL    |                |     # porn date
 | name    | char(255) | NO   |     | NULL    |                |     # porn name
 | summary | text      | YES  |     | NULL    |                |     # porn introduction
-| magnet  | char(255) | NO   |     | NULL    |                |     # porn magnet url
+| magnet  | char(255) | NO   |     | NULL    |                |     # porn magnet-link
 +---------+-----------+------+-----+---------+----------------+
 5 rows in set (0.00 sec)
 
