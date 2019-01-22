@@ -1,6 +1,6 @@
-# 1024 Spider
+# 1024 Spiders
 
-Some 1024 spiders, crawling porn information and magnet-link, inserting the database.
+Some 1024 spiders, crawl xp1024 porn information and magnet-links and insert them into the database.
 
 * Python 3.6
 * MySQL 8.0
@@ -10,8 +10,8 @@ Some 1024 spiders, crawling porn information and magnet-link, inserting the data
 ### Clone & Install
 
 ```
-git clone git@github.com:huihut/1024Spider.git
-cd 1024Spider && pip install -r requirements.txt
+git clone git@github.com:huihut/1024Spiders.git
+cd 1024Spiders && pip install -r requirements.txt
 ```
 
 ### Configure
