@@ -14,6 +14,8 @@ import json
 config = object
 
 
+# Read configuration from [config.json]
+# 从 [config.json] 读取配置信息
 class JsonCommand(object):
     def __init__(self):
         try:

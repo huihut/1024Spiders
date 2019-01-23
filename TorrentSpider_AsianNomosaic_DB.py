@@ -11,7 +11,8 @@ import os
 import time
 import pymysql
 
-# 1024网站请求头
+# 1024 http request header
+# 1024 网站请求头
 proxt_1024_req_header = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
     'Accept-Encoding': 'gzip, deflate',
@@ -31,7 +32,8 @@ proxt_1024_req_header = {
 }
 request_header = proxt_1024_req_header
 
-# 种子下载网站请求头
+# magnet-link website http request header
+# 磁力链接网站网站请求头
 proxt_torrent_req_header = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
     'Accept-Encoding': 'gzip, deflate',
@@ -56,32 +58,35 @@ opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 10.0; Win64; x64) Appl
                   ' (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 OPR/57.0.3098.116')]
 urllib.request.install_opener(opener)
 
-# 代理信息设置
+# proxy settings
+# 代理设置
 proxies = {'http': '127.0.0.1:1080', "https": "127.0.0.1:1080", }
 proxies_header = proxies
-isProxy = False                                      # 是否设置代理
+isProxy = False                                         # whether to set proxy  # 是否设置代理
 
-base_url = "http://w3.jbzcjsj.pw/pw/"           # 基础url
-save_path = "D:/code/Pycharm/1024Spider/torrent_asian_nomosaic"    # 存储图片路径
-fid = 5                                             # fid=5 表示亚洲无码
-page_start = 1                                      # 爬取的开始页
-page_end = 913                                      # 爬取的结束页
-thread_num = 1                                      # 线程数
+base_url = "http://w3.jbzcjsj.pw/pw/"                   # xp1024's base url     # xp1024的基本链接
+save_path = "D:/code/Pycharm/1024Spider/torrent_asian_nomosaic"    # pictures save path # 图片保存路径
+fid = 5                                                 # Fid=5 means Asian porn without mosaics. # Fid=5 表示亚洲无码
+page_start = 1                                          # crawl start page      # 爬取的开始页
+page_end = 913                                          # crawl end page        # 爬取的结束页
+thread_num = 1                                          # number of threads     # 线程数
 mySQLCommand = object
 
 
-# 用来操作数据库的类
+# Used to execute database commands
+# 用于执行数据库命令
 class MySQLCommand(object):
-    # 类的初始化
+    # init # 类的初始化
     def __init__(self):
-        self.host = ''          # 主机，本地填 127.0.0.1
-        self.port = 3306        # 数据端口号
-        self.user = ''          # 数据库用户名
-        self.password = ""      # 数据库密码
-        self.db = ""            # 数据库名
-        self.table_torrent = "AsianNomosaic"                       # 亚洲无码信息表
-        self.table_pictures = "AsianNomosaicPictures"      # 亚洲无码图片表
+        self.host = ''                                  # host ip or domain name，local is [127.0.0.1] # 数据库所在的主机
+        self.port = 3306                                # database port             # 数据库端口号
+        self.user = ''                                  # database username         # 数据库用户名
+        self.password = ""                              # database password         # 数据库密码
+        self.db = ""                                    # database name             # 数据库名
+        self.table_torrent = "AsianNomosaic"            # porn information table    # 影片信息表
+        self.table_pictures = "AsianNomosaicPictures"   # pictures table            # 图片表
 
+    # connect to database
     # 连接数据库
     def connect_mysql(self):
         try:
@@ -93,7 +98,8 @@ class MySQLCommand(object):
             print('[error] connect mysql error.' + str(e))
             return -1
 
-    # 查询数据
+    # query database table
+    # 查询表
     def query_table(self, tablename):
         sql = "SELECT * FROM " + tablename
         try:
@@ -104,13 +110,18 @@ class MySQLCommand(object):
         except Exception as e:
             print("Failed to " + sql + str(e))
 
+    # query porn information table
+    # 查询影片信息表
     def query_table_torrent(self):
         self.query_table(self.table_torrent)
 
+    # query pictures table
+    # 查询图片表
     def query_table_pictures(self):
         self.query_table(self.table_pictures)
 
-    # 插入到 table_torrent 返回刚插入的项的主键
+    # insert into [table_torrent] and return the primary key of the item just inserted
+    # 插入到 [table_torrent] 返回刚插入的项的主键
     def insert_table_torrent(self, data='', name='', summary='', magnet=''):
         sql = "INSERT INTO " + self.table_torrent + " (data, name, summary, magnet) VALUES ('" + data + "', '" + \
               name + "', '" + summary + "', '" + magnet + "')"
@@ -128,6 +139,7 @@ class MySQLCommand(object):
         except Exception as e:
             print("Failed to return last_insert_id." + str(e))
 
+    # insert into [table_pictures]
     # 插入到 table_pictures
     def insert_table_pictures(self, an_id='', name=''):
         sql = "INSERT INTO " + self.table_pictures + " (an_id, name) VALUES ('" + str(an_id) + "', '" + name + "')"
@@ -138,6 +150,7 @@ class MySQLCommand(object):
         except Exception as e:
             print("Failed to " + sql + str(e))
 
+    # close database
     def close_mysql(self):
         try:
             self.cursor.close()
@@ -146,6 +159,7 @@ class MySQLCommand(object):
             print("Failed to close mysql." + str(e))
 
 
+# conversion encode
 # 转换编码
 def Encode_Conversion(req):
     if req.encoding == 'ISO-8859-1':
@@ -154,14 +168,14 @@ def Encode_Conversion(req):
             encoding = encodings[0]
         else:
             encoding = req.apparent_encoding
-
         # encode_content = req.content.decode(encoding, 'replace').encode('utf-8', 'replace')
-        encode_content = req.content.decode(encoding, 'replace')  # 如果设置为replace，则会用?取代非法字符；
+        encode_content = req.content.decode(encoding, 'replace')
         return encode_content
     else:
         return ""
 
 
+# save [content] to [path]
 # 保存文本
 def Save_Text(id, path, content):
     try:
@@ -172,11 +186,11 @@ def Save_Text(id, path, content):
     except Exception as e:
         print("Save_Text Exception: " + str(e))
     else:
-        # 内容写入文件成功
         print("[" + str(id) + "] Successfully save the file to " + path)
         f.close()
 
 
+# torrent and magnet-link page
 # 种子/磁力链接页面
 def Prase_Torrent(id, url):
     try:
@@ -184,10 +198,8 @@ def Prase_Torrent(id, url):
             req = requests.get(url, params=torrent_request_header, proxies=proxies_header)
         else:
             req = requests.get(url, params=torrent_request_header)
-
-        # soup转换
+        
         soup = BeautifulSoup(req.content, "html.parser")
-
         torrent_content = soup.select('.uk-button ')
         torrent_content_num = len(torrent_content)
         if torrent_content_num == 0:
@@ -195,29 +207,34 @@ def Prase_Torrent(id, url):
             return ''
         for content in torrent_content:
             str_content = str(content)
+            # matching magnet-link
             # 匹配磁力链接
             matchObj = re.search(r'magnet(.*?)"', str_content)
             if matchObj:
                 magnet_link = 'magnet' + matchObj.group(1)
                 return magnet_link
             else:
-                # 匹配失败
+                # matching magnet-link failed
+                # 匹配磁力链接失败
                 print("[" + str(id) + "] No match: " + str_content)
                 return ''
     except Exception as e:
         print("[" + str(id) + "] Prase_Torrent Exception: " + str(e))
 
 
+# each post page
 # 每个帖子页面
 def Prase_Post(id, url, folder_name):
     try:
+        # match data
         # 匹配日期
         data = ''
         matchObj = re.search(r'\[(.*?)\]', folder_name, re.M | re.I)
         if matchObj:
-            data = matchObj.group(1)  # 文件夹名
+            data = matchObj.group(1)
         else:
-            # 匹配失败
+            # match data failed
+            # 匹配日期失败
             print("[" + str(id) + "] No match: " + folder_name)
 
         if (isProxy == True):
@@ -225,37 +242,39 @@ def Prase_Post(id, url, folder_name):
         else:
             req = requests.get(url, params=request_header)
 
-        # 转换编码
         encode_content = Encode_Conversion(req)
-        # soup转换
         soup = BeautifulSoup(encode_content, "html.parser")
-
         post_content = soup.select('div[id="read_tpc"]')
         post_content_num = len(post_content)
         if post_content_num == 0:
             print("[" + str(id) + "] No match post.")
             return
 
+        # save text content
         # 保存文本内容
         summary = post_content[0].text
         str_content = str(post_content[0])
 
-        # 匹配种子
+        # match magnet-link page
+        # 匹配磁力
         magnet_link = ''
         matchObj = re.findall(r'href="(.*?)"', str_content)
         if matchObj:
             for obj in matchObj:
                 magnet_link = Prase_Torrent(id, obj)
         else:
-            # 匹配种子失败
+            # match magnet-link page failed
+            # 匹配磁力失败
             print("[" + str(id) + "] No match: " + str_content)
 
-        # 插入到数据库：insert_table_torrent 表
+        # insert the [insert_table_torrent] table of the database
+        # 插入到 [insert_table_torrent] 表
         an_id = -1
         if folder_name != '' and magnet_link != '':
             an_id = mySQLCommand.insert_table_torrent(data=data, name=folder_name, summary=summary, magnet=magnet_link)
 
         if an_id != -1:
+            # create a folder to save the picture
             # 创建保存图片的文件夹
             folder_path = save_path + '/' + str(an_id)
             folder = os.path.exists(folder_path)
@@ -263,6 +282,7 @@ def Prase_Post(id, url, folder_name):
                 os.makedirs(folder_path)
                 print("[" + str(id) + "] Created folder " + str(an_id))
 
+            # match pictures
             # 匹配图片
             matchObj = re.findall(r'window.open\(\'(.*?)\'\);', str_content)
             if matchObj:
@@ -278,15 +298,18 @@ def Prase_Post(id, url, folder_name):
                             print("[" + str(id) + "] Download the picture Exception: " + str(e))
                         else:
                             print("[" + str(id) + "] Successfully save the image to " + folder_path + '/' + img_name)
-                            # 插入数据库： insert_table_pictures 表
+                            # insert the [insert_table_pictures] table of the database
+                            # 插入 [insert_table_pictures] 表
                             mySQLCommand.insert_table_pictures(an_id=an_id, name=img_name)
             else:
-                # 匹配失败
+                # 匹配图片失败
+                # match pictures failed
                 print("[" + str(id) + "] No match: " + str_content)
     except Exception as e:
         print("[" + str(id) + "] Prase_Post Exception: " + str(e))
 
 
+# post list page
 # 帖子列表页面
 def Post_list(id, page):
     try:
@@ -298,12 +321,8 @@ def Post_list(id, page):
         else:
             req = requests.get(post_url, params=request_header)
 
-        # 转换编码
         encode_content = Encode_Conversion(req)
-
-        # soup转换
         soup = BeautifulSoup(encode_content, "html.parser")
-        # 获取章节名称
         post_list = soup.select('tr[class="tr3 t_one"] h3 a')
         post_num = len(post_list)
         if post_num == 0:
@@ -311,12 +330,12 @@ def Post_list(id, page):
             return
         for post in post_list:
             str_post = str(post)
-            # html网页的匹配
             matchObj = re.match(r'(.*)href="(.*)" id=(.*)>(.*?)</a>', str_post, re.M | re.I)
             if matchObj:
-                post_url = matchObj.group(2)  # URL
-                post_name = matchObj.group(4)  # 文件夹名
+                post_url = matchObj.group(2)
+                post_name = matchObj.group(4)
                 if post_name != '':
+                    # match each post page
                     # 匹配每个帖子
                     Prase_Post(id, base_url + post_url,
                                post_name.replace(u'\0', u'').replace(u'/', u'.').replace(u'?',
@@ -329,7 +348,8 @@ def Post_list(id, page):
         print("[" + str(id) + "] Post_list Exception." + str(e))
 
 
-# 多线程下载
+# multi-threaded, the parameter [id] is the thread id
+# 多线程，参数 [id] 为线程 id
 def Work_thread(id):
     try:
         if id <= page_end:
@@ -350,12 +370,13 @@ def Work_thread(id):
 
 
 if __name__ == "__main__":
-    # 创建数据库操作类的实例
+    # database command object 
+    # # 数据库命令对象
     mySQLCommand = MySQLCommand()
     if mySQLCommand.connect_mysql() != -1:
-        # 单线程
+        # single thread # 单线程
         # Work_thread(1)
-        # 多线程
+        # multithreading # 多线程
         try:
             for i in range(1, thread_num + 1):
                 _thread.start_new_thread(Work_thread, (i,))
