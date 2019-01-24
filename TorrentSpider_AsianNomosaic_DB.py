@@ -151,6 +151,7 @@ class MySQLCommand(object):
             print("Failed to " + sql + str(e))
 
     # close database
+    # 关闭数据库连接
     def close_mysql(self):
         try:
             self.cursor.close()
@@ -342,6 +343,7 @@ def Post_list(id, page):
                                                                                          u'').replace(u'*',
                                                                                                       u''))
             else:
+                # match failed
                 # 匹配失败
                 print("[" + str(id) + "] No match: " + str_post)
     except Exception as e:
@@ -371,7 +373,7 @@ def Work_thread(id):
 
 if __name__ == "__main__":
     # database command object 
-    # # 数据库命令对象
+    # 数据库命令对象
     mySQLCommand = MySQLCommand()
     if mySQLCommand.connect_mysql() != -1:
         # single thread # 单线程

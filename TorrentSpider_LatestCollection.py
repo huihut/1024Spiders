@@ -11,7 +11,8 @@ import os
 import time
 
 
-# 1024网站请求头
+# 1024 http request header
+# 1024 网站请求头
 proxt_1024_req_header = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
     'Accept-Encoding': 'gzip, deflate',
@@ -31,7 +32,8 @@ proxt_1024_req_header = {
 }
 request_header = proxt_1024_req_header
 
-# 种子下载网站请求头
+# magnet-link website http request header
+# 磁力链接网站网站请求头
 proxt_torrent_req_header = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
     'Accept-Encoding': 'gzip, deflate',
@@ -56,7 +58,8 @@ opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 10.0; Win64; x64) Appl
                   ' (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 OPR/57.0.3098.116')]
 urllib.request.install_opener(opener)
 
-# 代理信息设置
+# proxy settings
+# 代理设置
 proxies = {'http': '127.0.0.1:1080', "https": "127.0.0.1:1080", }
 proxies_header = proxies
 isProxy = False                                          # 是否设置代理
@@ -69,6 +72,7 @@ page_end = 245                                           # 爬取的结束页
 thread_num = 1                                           # 线程数
 
 
+# conversion encode
 # 转换编码
 def Encode_Conversion(req):
     if req.encoding == 'ISO-8859-1':
@@ -85,6 +89,7 @@ def Encode_Conversion(req):
         return ""
 
 
+# save [content] to [path]
 # 保存文本
 def Save_Text(id, path, content):
     try:
@@ -100,6 +105,7 @@ def Save_Text(id, path, content):
         f.close()
 
 
+# torrent and magnet-link page
 # 种子/磁力链接页面
 def Prase_Torrent(id, url, folder_path):
     try:
@@ -138,6 +144,7 @@ def Prase_Torrent(id, url, folder_path):
         print("[" + str(id) + "] Prase_Torrent Exception: " + str(e))
 
 
+# each post page
 # 每个帖子页面
 def Prase_Post(id, url, folder_name):
    try:
@@ -201,6 +208,7 @@ def Prase_Post(id, url, folder_name):
        print("[" + str(id) + "] Prase_Post Exception: " + str(e))
 
 
+# post list page
 # 帖子列表页面
 def Post_list(id, page):
     try:
@@ -243,7 +251,8 @@ def Post_list(id, page):
         print("[" + str(id) + "] Post_list Exception." + str(e))
 
 
-# 多线程下载
+# multi-threaded, the parameter [id] is the thread id
+# 多线程，参数 [id] 为线程 id
 def Work_thread(id):
     try:
         if id <= page_end:
@@ -264,9 +273,9 @@ def Work_thread(id):
 
 
 if __name__ == "__main__":
-    # 单线程
+    # single thread # 单线程
     # Work_thread(1)
-    # 多线程
+    # multithreading # 多线程
     try:
         for i in range(1, thread_num + 1):
             _thread.start_new_thread(Work_thread, (i,))
