@@ -11,6 +11,7 @@ import re
 from urllib.parse import urlencode, parse_qs, urlsplit, urlunsplit
 
 
+# conversion encode
 # 转换编码
 def encodeConversion(req):
     if req.encoding == 'ISO-8859-1':
@@ -19,15 +20,15 @@ def encodeConversion(req):
             encoding = encodings[0]
         else:
             encoding = req.apparent_encoding
-
         # encode_content = req.content.decode(encoding, 'replace').encode('utf-8', 'replace')
-        encode_content = req.content.decode(encoding, 'replace')  # 如果设置为replace，则会用?取代非法字符；
+        encode_content = req.content.decode(encoding, 'replace')
         return encode_content
     else:
         return ""
 
 
-# 设置网络请求的参数
+# 设置 http 请求的参数
+# set the parameters of the http request
 def set_query_parameter(url, param_name, param_value):
     """Given a URL, set or replace a query parameter and return the
     modified URL.
@@ -45,10 +46,11 @@ def set_query_parameter(url, param_name, param_value):
     return urlunsplit((scheme, netloc, path, new_query_string, fragment))
 
 
+# each novel post page
 # 每个小说帖子页面
 def praseHtml(req_url , headers, path):
     try:
-        # 请求当前章节页面  params为请求参数
+        # 请求当前章节页面，params 为请求参数
         global isProxy
         global proxies
         if (isProxy == True):
@@ -85,6 +87,7 @@ def praseHtml(req_url , headers, path):
         f.close()
 
 
+# novel post list page
 # 成人小说帖子列表页面
 def novelList(directory_url, fid, page , chapter_url, headers, path):
     # content_url = directory_url + '?fid='+str(fid)+"&page="+str(page)
@@ -141,6 +144,8 @@ def novelList(directory_url, fid, page , chapter_url, headers, path):
                 return -1
 
 
+# Crawl start page to end page, statistical results
+# 爬取开始页到结束页，统计结果
 def spider(directory_url, fid, page_start, page_end, chapter_url, novel_list_req_header, path):
     page_num = abs(page_end-page_start)+1
     for each_page in range(page_start, page_end):
@@ -152,6 +157,7 @@ def spider(directory_url, fid, page_start, page_end, chapter_url, novel_list_req
 
 
 if __name__ == "__main__":
+    # request header
     # 请求头字典
     novel_list_req_header = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -171,6 +177,7 @@ if __name__ == "__main__":
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'\
                       ' Chrome/68.0.3440.106 Safari/537.36'
     }
+    # proxy request header
     # 代理时的请求头字典
     proxt_novel_list_req_header = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -196,12 +203,12 @@ if __name__ == "__main__":
     directory_url = "http://w3.afulyu.pw/pw/thread.php"                 # 小说目录url
     html_chapter_url = 'http://w3.afulyu.pw/pw/htm_data'                # 每篇小说的html页面
     php_chapter_url = 'http://w3.afulyu.pw/pw/read.php'                 # 每篇小说的php页面
-    save_path = 'D:\\code\\Pycharm\\1024Spider\\novel'                 # 保存在本地的路径
+    save_path = 'D:\\code\\Pycharm\\1024Spider\\novel'                  # 保存在本地的路径
     proxies = {'http': '127.0.0.1:1080', "https": "127.0.0.1:1080", }   # 代理信息
-    fid = 17            # 网站帖子类型，17代表小说
-    page_start = 1      # 小说目录开始页面
-    page_end = 940      # 小说目录结束页面
-    isProxy = False      # 是否设置代理
+    fid = 17                                                            # 网站帖子类型，17代表小说
+    page_start = 1                                                      # 小说目录开始页面
+    page_end = 940                                                      # 小说目录结束页面
+    isProxy = False                                                     # 是否设置代理
 
     spider(directory_url, fid, page_start, page_end, html_chapter_url, proxt_novel_list_req_header, save_path)
     
